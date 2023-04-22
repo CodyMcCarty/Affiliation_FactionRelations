@@ -5,7 +5,7 @@
 #include <math.h>
 #include <functional>
 
-using namespace std;
+// using namespace std;
 
 struct IntPairHash
 {
@@ -61,6 +61,7 @@ public:
         return relationships;
     }
 
+    // prints a human readable table
     void GetRelationshipsTable() const
     {
         int w = 6;
@@ -89,7 +90,7 @@ public:
         for (int i = 1; i <= maxFactionId; i++)
         {
             if (i % 5 == 0)
-                cout << endl;
+                std::cout << std::endl;
             std::cout << std::setw(w) << i << "|";
             for (int j = 1; j <= maxFactionId; j++)
             {
@@ -112,25 +113,26 @@ public:
     {
         int a, b;
         MinMax(faction1, faction2, a, b);
-        auto key = make_pair(a, b);
-        if (relationships.find(key) != relationships.end())
-        {
-            cout << "Relationship already exists" << endl;
-        }
-        else
-        {
-            relationships[key] = standing;
-        }
+        auto key = std::make_pair(a, b);
+
+        // if (relationships.find(key) != relationships.end())
+        // {
+        //     cout << "Relationship already exists" << endl;
+        // }
+        // else
+        // {
+        //     relationships[key] = standing;
+        // }
     }
 
     void UpdateRelationship(int faction1, int faction2, float standing = 0.5f)
     {
         int a, b;
         MinMax(faction1, faction2, a, b);
-        auto key = make_pair(a, b);
+        auto key = std::make_pair(a, b);
         if (relationships.find(key) == relationships.end())
         {
-            cout << "Relationship does not exist" << endl;
+            std::cout << "Relationship does not exist" << std::endl;
         }
         else
         {
@@ -204,39 +206,39 @@ public:
         double n = 1;
         int colWidth = 4;
         // Table Heder
-        std::cout << setw(colWidth) << " ";
+        std::cout << std::setw(colWidth) << " ";
         for (int i = 0; i < NumOfFactionsAtStart; i++)
         {
-            std::cout << setw(colWidth) << i;
+            std::cout << std::setw(colWidth) << i;
         }
 
         // print body
         for (int i = 0; i < NumOfFactionsAtStart; i++)
         {
-            std::cout << endl;
+            std::cout << std::endl;
             if (i % 5 == 0)
             {
-                cout << "\n";
+                std::cout << "\n";
             }
-            std::cout << setw(colWidth) << i;
+            std::cout << std::setw(colWidth) << i;
 
             for (int j = 0; j < NumOfFactionsAtStart; j++)
             {
                 if (relationships[{i, j}] == 1.0f)
                 {
-                    cout << setw(colWidth) << "1.0";
+                    std::cout << std::setw(colWidth) << "1.0";
                 }
                 else if (!relationships[{i, j}])
                 {
-                    cout << setw(colWidth) << "  ";
+                    std::cout << std::setw(colWidth) << "  ";
                 }
                 else if (relationships[{i, j}] == 0)
                 {
-                    cout << setw(colWidth) << "0.0";
+                    std::cout << std::setw(colWidth) << "0.0";
                 }
                 else
                 {
-                    cout << setprecision(2) << setw(colWidth) << relationships[{i, j}];
+                    std::cout << std::setprecision(2) << std::setw(colWidth) << relationships[{i, j}];
                 }
             }
         }
@@ -251,39 +253,29 @@ private:
 
     float NumOfFactionsAtStart = 12;
 
-    // pair<int, int> key(20, 4);
-    // auto it = factionRelationships.relationships.find(key);
-    // if (it != factionRelationships.relationships.end())
-    // {
-    //   cout << "exist, is: " << it->second << endl;
-    // }
-    // else
-    // {
-    //   cout << "nope " << endl;
-    // }
-
     void MinMax(int faction1, int faction2, int &min, int &max) const
     {
-        min = std::min(faction1, faction2);
-        max = std::max(faction1, faction2);
+        // min = std::min(faction1, faction2);
+        // max = std::max(faction1, faction2);
+        std::tie(min, max) = std::minmax(faction1, faction2);
     }
 };
 
 class Test
 {
 public:
-    void Get(int faction1, int faction2, float expected, std::function<float(int, int)> func, int &testNum, string desc = "-")
+    void Get(int faction1, int faction2, float expected, std::function<float(int, int)> func, int &testNum, std::string desc = "-")
     {
         testNum++;
         float rlt = func(faction2, faction1);
         float tolerance = 0.001f;
         bool bR = equals(expected, rlt);
-        cout << testNum << (bR ? " pass " : " fail ") << desc << endl;
+        std::cout << testNum << (bR ? " pass " : " fail ") << desc << std::endl;
         if (!bR)
         {
-            cout << "E: " << expected << "\nA: " << rlt << endl;
+            std::cout << "E: " << expected << "\nA: " << rlt << std::endl;
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 
 private:
@@ -302,7 +294,7 @@ int main()
     factionRelationships.DeleteFaction(3);
 
     float x = factionRelationships.GetRelationship(3, 2);
-    cout << x << endl;
+    std::cout << x << std::endl;
 
     factionRelationships.GetRelationshipsTable();
 
