@@ -20,7 +20,7 @@ class FactionRelationships
 public:
     FactionRelationships() : relationships{}
     {
-        // initialize all relationships as neutral and avoids duplicates
+        // initialize all relationships as neutral and avoids duplicates.  Use Print() to visualize.
         for (int i = 0; i < NumOfFactionsAtStart; i++)
         {
             for (int j = i; j < NumOfFactionsAtStart; j++)
@@ -44,7 +44,7 @@ public:
             return 1.0f;
 
         int a, b;
-        MinMax(faction1, faction2, a, b);
+        std::tie(a, b) = std::minmax(faction1, faction2);
         auto it = relationships.find(std::make_pair(a, b));
 
         if (it == relationships.end())
@@ -59,6 +59,92 @@ public:
     std::unordered_map<std::pair<int, int>, float, IntPairHash> GetRelationships() const
     {
         return relationships;
+    }
+
+    void CreateRelationship(int faction1, int faction2, float standing = 0.5f) // just take one faction
+    {
+        int a, b;
+        MinMax(faction1, faction2, a, b);
+        auto key = std::make_pair(a, b);
+
+        // if (relationships.find(key) != relationships.end())
+        // {
+        //     cout << "Relationship already exists" << endl;
+        // }
+        // else
+        // {
+        //     relationships[key] = standing;
+        // }
+    }
+
+    // used to set a relationship.  See UpdateRelationship() to increment a relationship.
+    void SetRelationship(int faction1, int faction2, float standing = 0.5f)
+    {
+        if (faction1 == faction2)
+        {
+            relationships[{faction1, faction2}] = 1.0f;
+        }
+
+        int a, b;
+        std::tie(a, b) = std::minmax(faction1, faction2);
+        if (relationships.find(std::make_pair(a, b)) == relationships.end())
+        {
+            std::cout << "Relationship does not exist" << std::endl;
+        }
+        else
+        {
+            relationships[{a, b}] = standing;
+        }
+    }
+
+    // increments or decrements the faction's relations.
+    void UpdateRelationship(int faction1, int faction2, float incrementStandingBy = -0.1f)
+    {
+        int a, b;
+        std::tie(a, b) = std::minmax(faction1, faction2);
+        auto key = std::make_pair(a, b);
+        if (relationships.find(key) == relationships.end())
+        {
+            std::cout << "Relationship does not exist" << std::endl;
+        }
+        else
+        {
+            relationships[key] += incrementStandingBy;
+            // clamp the relationship value to between 0 and 1
+            relationships[{a, b}] = std::max(0.0f, std::min(1.0f, relationships[{a, b}]));
+        }
+    }
+
+    // set relations to -1.0f
+    void SoftDelFaction(int faction)
+    {
+        for (auto it = relationships.begin(); it != relationships.end();)
+        {
+            if (it->first.first == faction || it->first.second == faction)
+            {
+                it->second = -1.0f;
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    // Erases faction.  See SoftDelFaction() to set relations to -1.
+    void DeleteFaction(int faction)
+    {
+        for (auto it = relationships.begin(); it != relationships.end();)
+        {
+            if (it->first.first == faction || it->first.second == faction)
+            {
+                it = relationships.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
     }
 
     // prints a human readable table
@@ -109,144 +195,9 @@ public:
         }
     }
 
-    void CreateRelationship(int faction1, int faction2, float standing = 0.5f) // just take one faction
-    {
-        int a, b;
-        MinMax(faction1, faction2, a, b);
-        auto key = std::make_pair(a, b);
-
-        // if (relationships.find(key) != relationships.end())
-        // {
-        //     cout << "Relationship already exists" << endl;
-        // }
-        // else
-        // {
-        //     relationships[key] = standing;
-        // }
-    }
-
-    void UpdateRelationship(int faction1, int faction2, float standing = 0.5f)
-    {
-        int a, b;
-        MinMax(faction1, faction2, a, b);
-        auto key = std::make_pair(a, b);
-        if (relationships.find(key) == relationships.end())
-        {
-            std::cout << "Relationship does not exist" << std::endl;
-        }
-        else
-        {
-            relationships[key] = standing;
-        }
-    }
-
-    void DeleteFaction(int faction)
-    {
-        for (auto it = relationships.begin(); it != relationships.end();)
-        {
-            if (it->first.first == faction || it->first.second == faction)
-            {
-                it = relationships.erase(it);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-    }
-
-    // float GetRelationship(int faction1, int faction2)
-    // {
-    //     if (faction1 >= NumOfFactionsAtStart || faction2 >= NumOfFactionsAtStart)
-    //     {
-    //       //TODO: print warning
-    //       cout << "out of Bounds" << endl;
-    //       return 0.0f;
-    //     }
-
-    //     int a, b;
-    //     MinMax(faction1, faction2, a, b);
-    //     return relationships[{a, b}];
-    // }
-
-    // void SetRelationship(int faction1, int faction2, float value)
-    // {
-    //   if (faction1 == faction2)
-    //   {
-    //     relationships[{faction1, faction2}] = 1.0f;
-    //   }
-
-    //   int a, b;
-    //   MinMax(faction1, faction2, a, b);
-    //   relationships[{a, b}] = value;
-    // }
-
-    // void UpdateRelationship (int faction1, int faction2, float amount = -0.1f)
-    // {
-    //   int a, b;
-    //   MinMax(faction1, faction2, a, b);
-    //   relationships[{a, b}] += amount;
-    //   // clamp the relationship value to between 0 and 1
-    //   relationships[{a, b}] = std::max(0.0f, std::min(1.0f, relationships[{a, b}]));
-    // }
-
-    // void CreateRelationship(int faction1, int faction2, float standing = 0.5)
-    // {
-    //   // if (faction1 <= )
-    //   // int a, b;
-    //   // MinMax(faction1, faction2, a, b);
-    // }
-
     // Add this public member function to enable iteration over the relationships
     std::unordered_map<std::pair<int, int>, float>::iterator begin() { return relationships.begin(); }
     std::unordered_map<std::pair<int, int>, float>::iterator end() { return relationships.end(); }
-
-    void PrintTable()
-    {
-        double n = 1;
-        int colWidth = 4;
-        // Table Heder
-        std::cout << std::setw(colWidth) << " ";
-        for (int i = 0; i < NumOfFactionsAtStart; i++)
-        {
-            std::cout << std::setw(colWidth) << i;
-        }
-
-        // print body
-        for (int i = 0; i < NumOfFactionsAtStart; i++)
-        {
-            std::cout << std::endl;
-            if (i % 5 == 0)
-            {
-                std::cout << "\n";
-            }
-            std::cout << std::setw(colWidth) << i;
-
-            for (int j = 0; j < NumOfFactionsAtStart; j++)
-            {
-                if (relationships[{i, j}] == 1.0f)
-                {
-                    std::cout << std::setw(colWidth) << "1.0";
-                }
-                else if (!relationships[{i, j}])
-                {
-                    std::cout << std::setw(colWidth) << "  ";
-                }
-                else if (relationships[{i, j}] == 0)
-                {
-                    std::cout << std::setw(colWidth) << "0.0";
-                }
-                else
-                {
-                    std::cout << std::setprecision(2) << std::setw(colWidth) << relationships[{i, j}];
-                }
-            }
-        }
-
-        // end space
-        std::cout << "\n"
-                  << std::endl;
-    }
 
 private:
     std::unordered_map<std::pair<int, int>, float, IntPairHash> relationships;
@@ -255,9 +206,8 @@ private:
 
     void MinMax(int faction1, int faction2, int &min, int &max) const
     {
-        // min = std::min(faction1, faction2);
-        // max = std::max(faction1, faction2);
-        std::tie(min, max) = std::minmax(faction1, faction2);
+        min = std::min(faction1, faction2);
+        max = std::max(faction1, faction2);
     }
 };
 
@@ -290,13 +240,38 @@ int main()
     FactionRelationships factionRelationships;
     Test test;
     int num = 9;
-
-    factionRelationships.DeleteFaction(3);
-
-    float x = factionRelationships.GetRelationship(3, 2);
-    std::cout << x << std::endl;
-
     factionRelationships.GetRelationshipsTable();
+
+    std::cout << "\nGetRelationship " << num << "\n"
+              << std::endl;
+    test.Get(
+        7, 8, 0.5f, [&](int a, int b)
+        { return factionRelationships.GetRelationship(a, b); },
+        num);
+
+    test.Get(
+        8, 7, 0.5f, [&](int a, int b)
+        { return factionRelationships.GetRelationship(a, b); },
+        num);
+
+    test.Get(
+        7, 7, 1.0f, [&](int a, int b)
+        { return factionRelationships.GetRelationship(a, b); },
+        num);
+
+    test.Get(
+        70, 7, -1.0f, [&](int a, int b)
+        { return factionRelationships.GetRelationship(a, b); },
+        num);
+
+    std::cout << "\nCreateRelationship TestNum: "
+              << "\n"
+              << num << std::endl;
+
+    // factionRelationships.DeleteFaction(3);
+
+    // float x = factionRelationships.GetRelationship(3, 2);
+    // std::cout << x << std::endl;
 
     // factionRelationships.PrintTable();
 
