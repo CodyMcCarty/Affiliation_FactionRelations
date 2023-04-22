@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <math.h>
 #include <functional>
+#include <string>
 
 // using namespace std;
 
@@ -61,20 +62,40 @@ public:
         return relationships;
     }
 
-    void CreateRelationship(int faction1, int faction2, float standing = 0.5f) // just take one faction
+    int GetLastFaction()
     {
-        int a, b;
-        MinMax(faction1, faction2, a, b);
-        auto key = std::make_pair(a, b);
+        int lastFaction = 0;
+        for (const auto &entry : relationships)
+        {
+            lastFaction = std::max({lastFaction, entry.first.first, entry.first.second});
+        }
+        return lastFaction + 1;
+    }
 
-        // if (relationships.find(key) != relationships.end())
-        // {
-        //     cout << "Relationship already exists" << endl;
-        // }
-        // else
-        // {
-        //     relationships[key] = standing;
-        // }
+    void CreateNewFaction(int faction, float standing = 0.5f)
+    {
+        for (auto it = relationships.begin(); it != relationships.end();)
+        {
+            if (it->first.first == faction || it->first.second == faction)
+            {
+                std::cout << "Faction already exist" << std::endl;
+                return;
+            }
+        }
+
+        for (int i = 0; i < relationships.size(); i++)
+        {
+            int a, b;
+            std::tie(a, b) = std::minmax(i, faction);
+            if (a == b)
+            {
+                relationships[{a, b}] = 1.0f;
+            }
+            else
+            {
+                relationships[{a, b}] = standing;
+            }
+        }
     }
 
     // used to set a relationship.  See UpdateRelationship() to increment a relationship.
@@ -240,10 +261,10 @@ int main()
     FactionRelationships factionRelationships;
     Test test;
     int num = 9;
-    factionRelationships.GetRelationshipsTable();
 
-    std::cout << "\nGetRelationship " << num << "\n"
-              << std::endl;
+    std::cout
+        << "\nGetRelationship " << num << "\n"
+        << std::endl;
     test.Get(
         7, 8, 0.5f, [&](int a, int b)
         { return factionRelationships.GetRelationship(a, b); },
@@ -263,10 +284,6 @@ int main()
         70, 7, -1.0f, [&](int a, int b)
         { return factionRelationships.GetRelationship(a, b); },
         num);
-
-    std::cout << "\nCreateRelationship TestNum: "
-              << "\n"
-              << num << std::endl;
 
     // factionRelationships.DeleteFaction(3);
 
